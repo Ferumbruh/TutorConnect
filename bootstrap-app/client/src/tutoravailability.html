@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tutor Availability</title>
+</head>
+<body>
+  <h1>Enter Tutor Availability</h1>
+  <form id="availabilityForm">
+    <label for="name">First Name:</label>
+    <input type="text" id="name" name="name" required><br><br>
+    
+    <label for="subject">Subject:</label>
+    <input type="text" id="subject" name="subject" required><br><br>
+
+    <h3>Availability (Select time range or "Not Available"):</h3>
+
+    <!-- Sunday -->
+    <label for="sunday">Sunday:</label>
+    <input type="time" id="sunday_start" name="sunday_start"> to 
+    <input type="time" id="sunday_end" name="sunday_end"><br><br>
+
+    <!-- Monday -->
+    <label for="monday">Monday:</label>
+    <input type="time" id="monday_start" name="monday_start"> to
+    <input type="time" id="monday_end" name="monday_end"><br><br>
+
+    <!-- Tuesday -->
+    <label for="tuesday">Tuesday:</label>
+    <input type="time" id="tuesday_start" name="tuesday_start"> to
+    <input type="time" id="tuesday_end" name="tuesday_end"><br><br>
+
+    <!-- Wednesday -->
+    <label for="wednesday">Wednesday:</label>
+    <input type="time" id="wednesday_start" name="wednesday_start"> to
+    <input type="time" id="wednesday_end" name="wednesday_end"><br><br>
+
+    <!-- Thursday -->
+    <label for="thursday">Thursday:</label>
+    <input type="time" id="thursday_start" name="thursday_start"> to
+    <input type="time" id="thursday_end" name="thursday_end"><br><br>
+
+    <!-- Friday -->
+    <label for="friday">Friday:</label>
+    <input type="time" id="friday_start" name="friday_start"> to
+    <input type="time" id="friday_end" name="friday_end"><br><br>
+
+    <!-- Saturday -->
+    <label for="saturday">Saturday:</label>
+    <input type="time" id="saturday_start" name="saturday_start"> to
+    <input type="time" id="saturday_end" name="saturday_end"><br><br>
+
+    <button type="submit">Submit</button>
+    <button type="button" id="resetButton">Reset Times</button>
+  </form>
+  
+  <script>
+    document.getElementById('availabilityForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // Collect values from form and format
+      const data = {
+        name: document.getElementById('name').value,
+        subject: document.getElementById('subject').value,
+        sunday: formatAvailability('sunday'),
+        monday: formatAvailability('monday'),
+        tuesday: formatAvailability('tuesday'),
+        wednesday: formatAvailability('wednesday'),
+        thursday: formatAvailability('thursday'),
+        friday: formatAvailability('friday'),
+        saturday: formatAvailability('saturday')
+      };
+
+      // Send to backend
+      fetch('/submit-availability', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert('Availability submitted successfully!');
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Submission failed.');
+      });
+    });
+
+    // Function to format availability
+    function formatAvailability(day) {
+      const start = document.getElementById(`${day}_start`).value;
+      const end = document.getElementById(`${day}_end`).value;
+      if (start && end) {
+        return `${formatTime(start)} - ${formatTime(end)}`;
+      }
+      return 'Not Available';
+    }
+
+    // Function to format time into AM/PM format
+    function formatTime(time) {
+      const [hour, minute] = time.split(':');
+      const hourInt = parseInt(hour);
+      const isPM = hourInt >= 12;
+      const formattedHour = hourInt % 12 || 12;
+      const formattedMinute = minute.padStart(2, '0');
+      const period = isPM ? 'PM' : 'AM';
+      return `${formattedHour}:${formattedMinute} ${period}`;
+    }
+
+    // Reset times when the Reset button is clicked
+    document.getElementById('resetButton').addEventListener('click', function() {
+      const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      days.forEach(day => {
+        document.getElementById(`${day}_start`).value = '';
+        document.getElementById(`${day}_end`).value = '';
+      });
+    });
+
+    // Reset if end time is earlier than start time
+    document.querySelectorAll('input[type="time"]').forEach(input => {
+      input.addEventListener('change', function() {
+        const day = input.name.split('_')[0];
+        const startTime = document.getElementById(`${day}_start`).value;
+        const endTime = document.getElementById(`${day}_end`).value;
+        if (startTime && endTime && startTime > endTime) {
+          alert(`End time cannot be earlier than start time for ${day.charAt(0).toUpperCase() + day.slice(1)}!`);
+          document.getElementById(`${day}_start`).value = '';
+          document.getElementById(`${day}_end`).value = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
