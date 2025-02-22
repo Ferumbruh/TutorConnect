@@ -51,6 +51,24 @@ const TutorsPage = () => (
   </Container>
 );
 
+// Brings google calendar to site
+const TutorSessionCalendar = () => (
+  <Container fluid className="d-flex justify-content-center align-items-center flex-column">
+    <h2 className="text-center mb-3" style={{ fontSize: "1.5rem", fontWeight: "bold", whiteSpace: "nowrap" }}>
+      Tutor Session Calendar
+    </h2>
+    <div style={{ width: "100vw", marginLeft: "0" }}> 
+      <iframe
+        src="https://calendar.google.com/calendar/embed?src=rokuyoshi%40gmail.com&ctz=America%"
+        width="100%" 
+        height="600px"
+        style={{ border: "1px solid #ccc", borderRadius: "10px" }}
+        allowFullScreen
+      ></iframe>
+    </div>
+  </Container>
+);
+
 const ResourcesPage = () => <h2 className="text-center mb-4">Resources</h2>;
 const ToolsPage = () => <h2 className="text-center mb-4">Tools</h2>;
 const ProfilePage = () => <h2 className="text-center mb-4">Profile</h2>;
@@ -84,7 +102,7 @@ const submitAvailability = async (availabilityData) => {
   }
 };
 
-// Custom Navbar for Students
+// Student Navbar
 const StudentNavbar = ({ setIsAuthenticated }) => {
   const location = useLocation();
   const getLinkStyle = (path) => ({
@@ -96,17 +114,14 @@ const StudentNavbar = ({ setIsAuthenticated }) => {
     backgroundColor: location.pathname === path ? '#555' : '#333',
     fontWeight: location.pathname === path ? 'bold' : 'normal',
   });
-  const isFeaturesActive = ['/tutors', '/resources', '/tools'].includes(location.pathname);
+  const isFeaturesActive = ['/tutors', '/add-event', '/tutor-session-calendar'].includes(location.pathname);
   const isProfileActive = location.pathname === '/profile';
+
   return (
-    <Navbar
-      expand="lg"
-      className="shadow-lg"
-      style={{
-        background: 'linear-gradient(90deg, rgba(72,61,139,1) 0%, rgba(93,109,160,1) 50%, rgba(72,61,139,1) 100%)',
-        padding: '15px 30px',
-      }}
-    >
+    <Navbar expand="lg" className="shadow-lg" style={{
+      background: 'linear-gradient(90deg, rgba(72,61,139,1) 0%, rgba(93,109,160,1) 50%, rgba(72,61,139,1) 100%)',
+      padding: '15px 30px',
+    }}>
       <Container>
         <Navbar.Brand as={Link} to="/" style={{ fontSize: '1.8rem', fontWeight: 'bold', color: getLinkStyle('/').color }}>
           Student Portal
@@ -127,14 +142,11 @@ const StudentNavbar = ({ setIsAuthenticated }) => {
               <NavDropdown.Item as={Link} to="/tutors" style={getDropdownItemStyle('/tutors')}>
                 Tutors
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/resources" style={getDropdownItemStyle('/resources')}>
-                Resources
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/tools" style={getDropdownItemStyle('/tools')}>
-                Tools
-              </NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/add-event" style={getDropdownItemStyle('/add-event')}>
                 Schedule a Tutor Session
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/tutor-session-calendar" style={getDropdownItemStyle('/tutor-session-calendar')}>
+                Tutor Session Calendar
               </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown
@@ -160,11 +172,12 @@ const StudentNavbar = ({ setIsAuthenticated }) => {
     </Navbar>
   );
 };
-// Custom Navbar for Tutors
+
+// Tutor Navbar
 const TutorNavbar = ({ setIsAuthenticated }) => {
   const location = useLocation();
   const getLinkStyle = (path) => ({
-    color: location.pathname === path ? '#00FF00' : 'white', // For example, tutors see green as active
+    color: location.pathname === path ? '#00FF00' : 'white',
     fontWeight: location.pathname === path ? 'bold' : '500',
   });
   const getDropdownItemStyle = (path) => ({
@@ -172,17 +185,14 @@ const TutorNavbar = ({ setIsAuthenticated }) => {
     backgroundColor: location.pathname === path ? '#333' : '#222',
     fontWeight: location.pathname === path ? 'bold' : 'normal',
   });
-  const isFeaturesActive = ['/tutors', '/resources', '/tools'].includes(location.pathname);
+  const isFeaturesActive = ['/tutors', '/tutor-availability'].includes(location.pathname);
   const isProfileActive = location.pathname === '/profile';
+
   return (
-    <Navbar
-      expand="lg"
-      className="shadow-lg"
-      style={{
-        background: 'linear-gradient(90deg, rgba(0,100,0,1) 0%, rgba(34,139,34,1) 50%, rgba(0,100,0,1) 100%)',
-        padding: '15px 30px',
-      }}
-    >
+    <Navbar expand="lg" className="shadow-lg" style={{
+      background: 'linear-gradient(90deg, rgba(0,100,0,1) 0%, rgba(34,139,34,1) 50%, rgba(0,100,0,1) 100%)',
+      padding: '15px 30px',
+    }}>
       <Container>
         <Navbar.Brand as={Link} to="/" style={{ fontSize: '1.8rem', fontWeight: 'bold', color: getLinkStyle('/').color }}>
           Tutor Portal
@@ -203,14 +213,11 @@ const TutorNavbar = ({ setIsAuthenticated }) => {
               <NavDropdown.Item as={Link} to="/tutors" style={getDropdownItemStyle('/tutors')}>
                 Tutors
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/resources" style={getDropdownItemStyle('/resources')}>
-                Resources
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/tools" style={getDropdownItemStyle('/tools')}>
-                Tools
-              </NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/tutor-availability" style={getDropdownItemStyle('/tutor-availability')}>
-              Tutor Availability
+                Tutor Availability
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/tutor-session-calendar" style={getDropdownItemStyle('/tutor-session-calendar')}>
+                Tutor Session Calendar
               </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown
@@ -236,6 +243,7 @@ const TutorNavbar = ({ setIsAuthenticated }) => {
     </Navbar>
   );
 };
+
 function App() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -272,6 +280,7 @@ function App() {
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/tutor-availability" element={<TutorAvailability />} /> 
                   <Route path="/add-event" element={<AddEvent />} />
+                  <Route path="/tutor-session-calendar" element={<TutorSessionCalendar />} />
                 </Routes>
               ) : (
                 <Card className="shadow-lg p-4">
