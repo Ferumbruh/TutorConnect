@@ -15,6 +15,11 @@ import {
 } from 'react-bootstrap';
 import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom';
 import TutorAvailability from './tutoravailability';
+import AddEvent from './AddEvent';  
+
+// Inside <Routes> component
+<Route path="/add-event" element={<AddEvent />} />
+
 
 // Dummy authentication function
 const authenticateUser = (username, password) => {
@@ -110,6 +115,9 @@ const StudentNavbar = ({ setIsAuthenticated }) => {
               </NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/tools" style={getDropdownItemStyle('/tools')}>
                 Tools
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/add-event" style={getDropdownItemStyle('/add-event')}>
+                Schedule a Tutor Session
               </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown
@@ -246,6 +254,7 @@ function App() {
                   <Route path="/tools" element={<ToolsPage />} />
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/tutor-availability" element={<TutorAvailability />} /> 
+                  <Route path="/add-event" element={<AddEvent />} />
                 </Routes>
               ) : (
                 <Card className="shadow-lg p-4">
