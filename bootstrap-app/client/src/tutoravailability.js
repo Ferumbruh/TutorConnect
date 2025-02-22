@@ -74,7 +74,7 @@ const TutorAvailability = () => {
       <h1 className="text-center">Enter Tutor Availability</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-3">
-          <label className="form-label">First Name:</label>
+          <label className="form-label">Name:</label>
           <input type="text" className="form-control" name="name" value={availability.name} onChange={handleChange} required />
         </div>
 
