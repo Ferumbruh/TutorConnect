@@ -33,7 +33,24 @@ const authenticateUser = (username, password) => {
 };
 // Pages
 const HomePage = ({ username }) => <h2 className="text-center mb-4">Welcome, {username}!</h2>;
-const TutorsPage = () => <h2 className="text-center mb-4">Tutors</h2>;
+// Brings google sheet to site
+const TutorsPage = () => (
+  <Container fluid className="d-flex justify-content-center align-items-center flex-column">
+    <h2 className="text-center mb-3" style={{ fontSize: "1.5rem", fontWeight: "bold", whiteSpace: "nowrap" }}>
+      Tutor Availability Spreadsheet
+    </h2>
+    <div style={{ width: "100vw", marginLeft: "0" }}> 
+      <iframe
+        src="https://docs.google.com/spreadsheets/d/1bBMPhukDDXlUEuZJ99PH80tUXEsNiSB1Nx39bndzfhE/edit?usp=sharing&widget=true&headers=false"
+        width="100%" 
+        height="600px"
+        style={{ border: "1px solid #ccc", borderRadius: "10px" }}
+        allowFullScreen
+      ></iframe>
+    </div>
+  </Container>
+);
+
 const ResourcesPage = () => <h2 className="text-center mb-4">Resources</h2>;
 const ToolsPage = () => <h2 className="text-center mb-4">Tools</h2>;
 const ProfilePage = () => <h2 className="text-center mb-4">Profile</h2>;
