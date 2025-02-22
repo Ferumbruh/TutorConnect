@@ -36,3 +36,16 @@
     transform: rotate(360deg);
   }
 }
+
+.iframe-container {
+  width: 100%; /* Make it span the full screen */
+  display: flex;
+  justify-content: center;
+}
+
+iframe {
+  width: 90vw; /* Adjust this based on how much space you need */
+  max-width: 100%; /* Prevent it from going beyond the navbar */
+  height: 80vh; /* Adjust height as needed */
+  border: none;
+}
