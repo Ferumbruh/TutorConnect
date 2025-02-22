@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const AddEvent = () => {
   const [eventData, setEventData] = useState({
@@ -9,19 +9,34 @@ const AddEvent = () => {
     location: '',
   });
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const authResponse = await fetch('http://localhost:3000/check-auth');
+      const authData = await authResponse.json();
+
+      if (!authData.authenticated) {
+        // Redirect to authentication
+        window.location.href = 'http://localhost:3000/auth';
+      }
+    };
+
+    checkAuth();
+  }, []);
+
   const handleChange = (e) => {
     setEventData({ ...eventData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     try {
       const response = await fetch('http://localhost:3000/add-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(eventData),
       });
+
       const data = await response.json();
       alert(data.message || 'Event added successfully!');
     } catch (error) {

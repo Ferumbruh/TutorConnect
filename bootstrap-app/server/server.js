@@ -24,6 +24,15 @@ const oauth2Client = new google.auth.OAuth2(
   process.env.REDIRECT_URI
 );
 
+// Google Authentication with Account
+app.get('/check-auth', (req, res) => {
+  if (oauth2Client.credentials && oauth2Client.credentials.access_token) {
+    res.json({ authenticated: true });
+  } else {
+    res.json({ authenticated: false });
+  }
+});
+
 // Google Authentication Route
 app.get('/auth', (req, res) => {
   const authUrl = oauth2Client.generateAuthUrl({
@@ -35,10 +44,17 @@ app.get('/auth', (req, res) => {
 
 // Callback after Google Authentication
 app.get('/auth/callback', async (req, res) => {
-  const code = req.query.code;
-  const { tokens } = await oauth2Client.getToken(code);
-  oauth2Client.setCredentials(tokens);
-  res.send('Authentication successful! You can now add events.');
+  try {
+    const code = req.query.code;
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+
+    // Redirect back to AddEvent.js page (frontend)
+    res.redirect('http://localhost:3001/add-event');
+  } catch (error) {
+    console.error('Authentication error:', error);
+    res.status(500).send('Authentication failed');
+  }
 });
 
 // Route to handle adding events to Google Calendar
