@@ -9,12 +9,9 @@ const app = express();
 app.use(cors());
 // Middleware
 app.use(bodyParser.json());
-// Serve static files like HTML
-app.use(express.static(path.join(__dirname, 'public'))); 
 
-// Route to serve the index.html page (Root route)
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.send('Backend is running!');
 });
 
 // Google OAuth2 Client Setup for Calendar API
@@ -177,6 +174,7 @@ const formatAvailability = (start, end) => {
 });
 
 // Start the server
-app.listen(3000, () => {
-  console.log('Server running on http://localhost:3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
