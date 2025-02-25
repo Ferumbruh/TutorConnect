@@ -9,9 +9,11 @@ const AddEvent = () => {
     location: '',
   });
 
+  const BACKEND_URL = "https://tutorconnect-1u9q.onrender.com"; 
   useEffect(() => {
     const checkAuth = async () => {
-      const authResponse = await fetch('http://localhost:3000/check-auth');
+
+      const authResponse = await fetch(`${BACKEND_URL}/check-auth`);
       const authData = await authResponse.json();
 
       if (!authData.authenticated) {
@@ -31,7 +33,7 @@ const AddEvent = () => {
     e.preventDefault();
     
     try {
-      const response = await fetch('http://localhost:3000/add-event', {
+      const response = await fetch(`${BACKEND_URL}/add-event`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(eventData),
