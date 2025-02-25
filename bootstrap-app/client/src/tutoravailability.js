@@ -27,10 +27,12 @@ const TutorAvailability = () => {
     });
   };
 
+  const BACKEND_URL = "https://tutorconnect-1u9q.onrender.com";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3000/submit-availability', {
+      const response = await fetch(`${BACKEND_URL}/submit-availability`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
