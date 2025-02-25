@@ -10,18 +10,18 @@ const AddEvent = () => {
   });
 
   const BACKEND_URL = "https://tutorconnect-1u9q.onrender.com"; 
+  
   useEffect(() => {
     const checkAuth = async () => {
-
       const authResponse = await fetch(`${BACKEND_URL}/check-auth`);
       const authData = await authResponse.json();
-
+  
       if (!authData.authenticated) {
         // Redirect to authentication
-        window.location.href = 'http://localhost:3000/auth';
+        window.location.href = `${BACKEND_URL}/auth`;
       }
     };
-
+  
     checkAuth();
   }, []);
 

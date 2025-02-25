@@ -55,7 +55,7 @@ app.get('/auth/callback', async (req, res) => {
     oauth2Client.setCredentials(tokens);
 
     // Redirect back to AddEvent.js page (frontend)
-    res.redirect('http://localhost:3001/add-event');
+    res.redirect('https://tutorconnectfrontend.onrender.com/add-event');
   } catch (error) {
     console.error('Authentication error:', error);
     res.status(500).send('Authentication failed');
