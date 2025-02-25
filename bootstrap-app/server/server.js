@@ -6,7 +6,16 @@ require('dotenv').config();
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+
+// Configure CORS to allow requests only from your frontend
+const corsOptions = {
+  origin: 'http://localhost:3001', // Change this to your frontend's domain when deployed
+  methods: 'GET,POST',
+  allowedHeaders: 'Content-Type,Authorization',
+};
+
+app.use(cors(corsOptions));
+
 // Middleware
 app.use(bodyParser.json());
 
@@ -58,14 +67,11 @@ app.get('/auth/callback', async (req, res) => {
 app.post('/add-event', async (req, res) => {
   console.log('Received event data:', req.body);
 
-  // Ensure oauth2Client has valid credentials
   if (!oauth2Client.credentials || !oauth2Client.credentials.access_token) {
     return res.status(400).json({ error: 'User not authenticated' });
   }
 
   const { title, startDateTime, endDateTime, description, location } = req.body;
-
-  // Convert the date-time to ISO format
   const start = new Date(startDateTime);
   const end = new Date(endDateTime);
 
@@ -73,21 +79,16 @@ app.post('/add-event', async (req, res) => {
     return res.status(400).json({ error: 'Invalid date format' });
   }
 
-  console.log('Validated Start:', start);
-  console.log('Validated End:', end);
-
   const event = {
     summary: title,
     location: location || 'Online',
     description: description || 'No description',
     start: {
-      // Convert to ISO format
-      dateTime: start.toISOString(), 
+      dateTime: start.toISOString(),
       timeZone: 'America/New_York',
     },
     end: {
-      // Convert to ISO format
-      dateTime: end.toISOString(), 
+      dateTime: end.toISOString(),
       timeZone: 'America/New_York',
     },
   };
@@ -120,22 +121,20 @@ app.post('/submit-availability', async (req, res) => {
           friday_start, friday_end, 
           saturday_start, saturday_end } = req.body;
 
-// Function to convert 24-hour time (HH:mm) to 12-hour format with AM/PM
-const convertTo12HourFormat = (time) => {
-  if (!time) return ""; // Handle empty values
-  const [hours, minutes] = time.split(":").map(Number);
-  const period = hours >= 12 ? "PM" : "AM";
-  const formattedHours = hours % 12 || 12; // Convert 0 (midnight) to 12
-  return `${formattedHours}:${minutes.toString().padStart(2, "0")} ${period}`;
-};
+  const convertTo12HourFormat = (time) => {
+    if (!time) return ""; 
+    const [hours, minutes] = time.split(":").map(Number);
+    const period = hours >= 12 ? "PM" : "AM";
+    const formattedHours = hours % 12 || 12;
+    return `${formattedHours}:${minutes.toString().padStart(2, "0")} ${period}`;
+  };
 
-// Function to format availability with 12-hour times
-const formatAvailability = (start, end) => {
-  return start && end ? `${convertTo12HourFormat(start)} - ${convertTo12HourFormat(end)}` : "Not Available";
-};
-  // Format the row correctly
+  const formatAvailability = (start, end) => {
+    return start && end ? `${convertTo12HourFormat(start)} - ${convertTo12HourFormat(end)}` : "Not Available";
+  };
+
   const tutorEntry = [
-    `${name} - ${subject}`, // Combines name and subject in one column
+    `${name} - ${subject}`,
     formatAvailability(sunday_start, sunday_end),
     formatAvailability(monday_start, monday_end),
     formatAvailability(tuesday_start, tuesday_end),
@@ -147,18 +146,17 @@ const formatAvailability = (start, end) => {
 
   try {
     const auth = new google.auth.GoogleAuth({
-      keyFile: path.join(__dirname, 'credentials.json'), // Ensure correct path
+      keyFile: path.join(__dirname, 'credentials.json'),
       scopes: ['https://www.googleapis.com/auth/spreadsheets']
     });
 
     const authClient = await auth.getClient();
-    const spreadsheetId = process.env.SPREADSHEET_ID; // Add this to your .env file
+    const spreadsheetId = process.env.SPREADSHEET_ID;
 
-    // Append new row to Google Sheets
     await sheets.spreadsheets.values.append({
       auth: authClient,
       spreadsheetId,
-      range: 'Sheet1!A:H', // Now correctly fits 8 columns (A:H)
+      range: 'Sheet1!A:H',
       valueInputOption: 'RAW',
       insertDataOption: 'INSERT_ROWS',
       resource: {
