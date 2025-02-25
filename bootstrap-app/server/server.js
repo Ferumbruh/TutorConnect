@@ -9,11 +9,10 @@ const app = express();
 
 // Configure CORS to allow requests only from your frontend
 const corsOptions = {
-  origin: 'http://localhost:3001', // Change this to your frontend's domain when deployed
-  methods: 'GET,POST',
-  allowedHeaders: 'Content-Type,Authorization',
+  origin: ["https://tutorconnectfrontend.onrender.com", "http://localhost:3001"],
+  methods: "GET,POST",
+  allowedHeaders: "Content-Type,Authorization",
 };
-
 app.use(cors(corsOptions));
 
 // Middleware
