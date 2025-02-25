@@ -88,17 +88,20 @@ const addEventToCalendar = async (eventData) => {
   }
 };
 
+const API_BASE_URL = "https://tutorconnect-1u9q.onrender.com";
+
 const submitAvailability = async (availabilityData) => {
   try {
-    const response = await fetch('http://localhost:3000/submit-availability', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await fetch(`${API_BASE_URL}/submit-availability`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(availabilityData),
     });
     const data = await response.json();
     alert(data.message);
   } catch (error) {
-    console.error('Error submitting availability:', error);
+    console.error("Error submitting availability:", error);
+    alert("Submission failed. Please try again.");
   }
 };
 
