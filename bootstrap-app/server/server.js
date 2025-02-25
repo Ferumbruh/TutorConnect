@@ -50,11 +50,14 @@ app.get('/auth', (req, res) => {
 // Callback after Google Authentication
 app.get('/auth/callback', async (req, res) => {
   try {
+    console.log("OAuth callback received");
     const code = req.query.code;
+    console.log("Received code:", code);
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
+    console.log("Tokens received:", tokens);
 
-    // Redirect back to AddEvent.js page (frontend)
+    // Redirect to frontend
     res.redirect('https://tutorconnectfrontend.onrender.com/add-event');
   } catch (error) {
     console.error('Authentication error:', error);
