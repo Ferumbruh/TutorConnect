@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Navbar,
@@ -151,6 +152,7 @@ const ProfilePage = () => (
 
 const StudentNavbar = ({ setIsAuthenticated }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const getLinkStyle = (path) => ({
     color: location.pathname === path ? '#FFD700' : 'white',
     fontWeight: location.pathname === path ? 'bold' : '500',
@@ -160,6 +162,10 @@ const StudentNavbar = ({ setIsAuthenticated }) => {
     backgroundColor: location.pathname === path ? '#555' : '#333',
     fontWeight: location.pathname === path ? 'bold' : 'normal',
   });
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    navigate("/"); // Redirect to home
+  };
   const isFeaturesActive = ['/tutors', '/add-event', '/tutor-session-calendar'].includes(location.pathname);
   const isProfileActive = location.pathname === '/profile';
 
@@ -208,7 +214,7 @@ const StudentNavbar = ({ setIsAuthenticated }) => {
                 View Profile
               </NavDropdown.Item>
               <NavDropdown.Divider />
-              <NavDropdown.Item onClick={() => setIsAuthenticated(false)} style={{ color: 'red' }}>
+              <NavDropdown.Item onClick={handleLogout} style={{ color: 'red' }}>
                 Log Out
               </NavDropdown.Item>
             </NavDropdown>
@@ -221,6 +227,7 @@ const StudentNavbar = ({ setIsAuthenticated }) => {
 
 const TutorNavbar = ({ setIsAuthenticated }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const getLinkStyle = (path) => ({
     color: location.pathname === path ? '#00FF00' : 'white',
     fontWeight: location.pathname === path ? 'bold' : '500',
@@ -230,6 +237,11 @@ const TutorNavbar = ({ setIsAuthenticated }) => {
     backgroundColor: location.pathname === path ? '#333' : '#222',
     fontWeight: location.pathname === path ? 'bold' : 'normal',
   });
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    navigate("/"); // Redirect to home
+  };
+
   const isFeaturesActive = ['/tutors', '/tutoravailability'].includes(location.pathname);
   const isProfileActive = location.pathname === '/profile';
 
@@ -278,7 +290,7 @@ const TutorNavbar = ({ setIsAuthenticated }) => {
                 View Profile
               </NavDropdown.Item>
               <NavDropdown.Divider />
-              <NavDropdown.Item onClick={() => setIsAuthenticated(false)} style={{ color: 'red' }}>
+              <NavDropdown.Item onClick={handleLogout} style={{ color: 'red' }}>
                 Log Out
               </NavDropdown.Item>
             </NavDropdown>
