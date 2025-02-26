@@ -33,19 +33,24 @@ const API_BASE_URL = "https://tutorconnect-1u9q.onrender.com";
 
 const addEventToCalendar = async (eventData) => {
   try {
-    // Convert local time to UTC (Adjust based on your input format)
+    // Parse the input datetime as a local time
     const localStartTime = new Date(eventData.startTime);
     const localEndTime = new Date(eventData.endTime);
 
-    // Convert to ISO string and adjust for UTC
-    const startUTC = localStartTime.toISOString(); // Converts to UTC
-    const endUTC = localEndTime.toISOString();
+    // Convert to UTC explicitly
+    const startUTC = new Date(
+      localStartTime.getTime() - localStartTime.getTimezoneOffset() * 60000
+    ).toISOString();
+
+    const endUTC = new Date(
+      localEndTime.getTime() - localEndTime.getTimezoneOffset() * 60000
+    ).toISOString();
 
     const googleEvent = {
       summary: eventData.title,
       description: eventData.description,
       start: {
-        dateTime: startUTC,  // Send in UTC format
+        dateTime: startUTC, // Send in UTC format
         timeZone: "America/New_York", // Specify correct timezone
       },
       end: {
