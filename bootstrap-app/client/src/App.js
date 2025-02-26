@@ -12,14 +12,9 @@ import {
   Row,
   Col,
   NavDropdown,
+  Modal,
 } from 'react-bootstrap';
 import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom';
-import TutorAvailability from './tutoravailability';
-import AddEvent from './AddEvent';  
-
-// Inside <Routes> component
-<Route path="/add-event" element={<AddEvent />} />
-
 
 // Dummy authentication function
 const authenticateUser = (username, password) => {
@@ -31,49 +26,10 @@ const authenticateUser = (username, password) => {
   }
   return null;
 };
-// Pages
-const HomePage = ({ username }) => <h2 className="text-center mb-4">Welcome, {username}!</h2>;
-// Brings google sheet to site
-const TutorsPage = () => (
-  <Container fluid className="d-flex justify-content-center align-items-center flex-column">
-    <h2 className="text-center mb-3" style={{ fontSize: "1.5rem", fontWeight: "bold", whiteSpace: "nowrap" }}>
-      Tutor Availability Spreadsheet
-    </h2>
-    <div style={{ width: "100vw", marginLeft: "0" }}> 
-      <iframe
-        src="https://docs.google.com/spreadsheets/d/1bBMPhukDDXlUEuZJ99PH80tUXEsNiSB1Nx39bndzfhE/edit?usp=sharing&widget=true&headers=false"
-        width="100%" 
-        height="600px"
-        style={{ border: "1px solid #ccc", borderRadius: "10px" }}
-        allowFullScreen
-      ></iframe>
-    </div>
-  </Container>
-);
 
-// Brings google calendar to site
-const TutorSessionCalendar = () => (
-  <Container fluid className="d-flex justify-content-center align-items-center flex-column">
-    <h2 className="text-center mb-3" style={{ fontSize: "1.5rem", fontWeight: "bold", whiteSpace: "nowrap" }}>
-      Tutor Session Calendar
-    </h2>
-    <div style={{ width: "100vw", marginLeft: "0" }}> 
-      <iframe
-        src="https://calendar.google.com/calendar/embed?src=rokuyoshi%40gmail.com&ctz=America%"
-        width="100%" 
-        height="600px"
-        style={{ border: "1px solid #ccc", borderRadius: "10px" }}
-        allowFullScreen
-      ></iframe>
-    </div>
-  </Container>
-);
+// API calls for Google Calendar and Sheets
+const API_BASE_URL = "https://tutorconnect-1u9q.onrender.com";
 
-const ResourcesPage = () => <h2 className="text-center mb-4">Resources</h2>;
-const ToolsPage = () => <h2 className="text-center mb-4">Tools</h2>;
-const ProfilePage = () => <h2 className="text-center mb-4">Profile</h2>;
-
-// API calls for Google calender and sheets
 const addEventToCalendar = async (eventData) => {
   try {
     const response = await fetch('http://localhost:3000/add-event', {
@@ -87,8 +43,6 @@ const addEventToCalendar = async (eventData) => {
     console.error('Error adding event:', error);
   }
 };
-
-const API_BASE_URL = "https://tutorconnect-1u9q.onrender.com";
 
 const submitAvailability = async (availabilityData) => {
   try {
@@ -105,7 +59,183 @@ const submitAvailability = async (availabilityData) => {
   }
 };
 
-// Student Navbar
+// HomePage with Latest Announcements as a Modal Popup.
+// For students, it contains links to tutors, schedule a tutor session, and session calendar.
+// For tutors, it contains links to the tutor page, tutor availability, and tutor session calendar.
+const HomePage = ({ username, role }) => {
+  const [showAnnouncement, setShowAnnouncement] = useState(true);
+
+  return (
+    <Container className="mt-4">
+      <h2>Welcome, {username}!</h2>
+      <p>
+        This portal provides quick access to tutor sessions, availability updates, and useful resources.
+        Explore the navigation menu to learn more.
+      </p>
+
+      <Modal show={showAnnouncement} onHide={() => setShowAnnouncement(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Latest Announcements</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {role === 'student' ? (
+            <>
+              Check out our <Link to="/tutors">tutors page</Link>,{' '}
+              <Link to="/add-event">schedule a tutor session</Link>, and{' '}
+              <Link to="/tutor-session-calendar">session calendar</Link>.
+            </>
+          ) : (
+            <>
+              Check out our <Link to="/tutors">tutor page</Link>,{' '}
+              <Link to="/tutor-availability">tutor availability</Link>, and{' '}
+              <Link to="/tutor-session-calendar">tutor session calendar</Link>.
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowAnnouncement(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </Container>
+  );
+};
+
+const TutorsPage = () => (
+  <>
+    <Container fluid className="mt-4">
+      <h2 className="text-center">Tutor Availability Spreadsheet</h2>
+      <p className="text-center">
+        Below is the up-to-date availability of our tutors. Please refer to this sheet for the most current schedules.
+      </p>
+    </Container>
+    <Container fluid className="p-0">
+      <iframe
+        src="https://docs.google.com/spreadsheets/d/1bBMPhukDDXlUEuZJ99PH80tUXEsNiSB1Nx39bndzfhE/edit?usp=sharing&widget=true&headers=false"
+        width="100%"
+        height="600px"
+        style={{ border: "1px solid #ccc", borderRadius: "10px" }}
+        allowFullScreen
+        title="Tutor Availability Spreadsheet"
+      ></iframe>
+    </Container>
+  </>
+);
+
+const TutorSessionCalendar = () => (
+  <Container fluid className="mt-4">
+    <h2 className="text-center">Tutor Session Calendar</h2>
+    <p className="text-center">
+      Use this calendar to view and schedule tutor sessions. Click on a session for more details.
+    </p>
+    <Container fluid className="p-0">
+      <iframe
+        src="https://calendar.google.com/calendar/embed?src=rokuyoshi%40gmail.com&ctz=America/New_York"
+        width="100%"
+        height="600px"
+        style={{ border: "1px solid #ccc", borderRadius: "10px" }}
+        allowFullScreen
+        title="Tutor Session Calendar"
+      ></iframe>
+    </Container>
+  </Container>
+);
+
+const ProfilePage = () => (
+  <Container className="mt-4">
+    <h2>Your Profile</h2>
+    <p>
+      Manage your account details here. Update your information, view your session history, and customize your settings.
+    </p>
+  </Container>
+);
+
+const AddEvent = () => {
+  const [eventData, setEventData] = useState({ title: '', date: '', description: '' });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await addEventToCalendar(eventData);
+  };
+
+  return (
+    <Container className="mt-4">
+      <h2>Schedule a Tutor Session</h2>
+      <p>
+        Fill out the form below to add a new tutor session. All fields are required.
+      </p>
+      <Form onSubmit={handleSubmit}>
+        <Form.Group controlId="eventTitle" className="mb-3">
+          <Form.Label>Session Title</Form.Label>
+          <Form.Control 
+            type="text" 
+            placeholder="Enter session title" 
+            value={eventData.title} 
+            onChange={(e) => setEventData({ ...eventData, title: e.target.value })}
+          />
+        </Form.Group>
+        <Form.Group controlId="eventDate" className="mb-3">
+          <Form.Label>Date</Form.Label>
+          <Form.Control 
+            type="date" 
+            value={eventData.date} 
+            onChange={(e) => setEventData({ ...eventData, date: e.target.value })}
+          />
+        </Form.Group>
+        <Form.Group controlId="eventDescription" className="mb-3">
+          <Form.Label>Description</Form.Label>
+          <Form.Control 
+            as="textarea" 
+            rows={3}
+            placeholder="Enter a brief description"
+            value={eventData.description} 
+            onChange={(e) => setEventData({ ...eventData, description: e.target.value })}
+          />
+        </Form.Group>
+        <Button variant="primary" type="submit">Add Event</Button>
+      </Form>
+    </Container>
+  );
+};
+
+const TutorAvailability = () => {
+  const [availability, setAvailability] = useState({ date: '', time: '' });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await submitAvailability(availability);
+  };
+
+  return (
+    <Container className="mt-4">
+      <h2>Tutor Availability</h2>
+      <p>
+        Update your availability by selecting the date and time you’re available. This information helps students book sessions with you.
+      </p>
+      <Form onSubmit={handleSubmit}>
+        <Form.Group controlId="availabilityDate" className="mb-3">
+          <Form.Label>Date</Form.Label>
+          <Form.Control 
+            type="date" 
+            value={availability.date} 
+            onChange={(e) => setAvailability({ ...availability, date: e.target.value })}
+          />
+        </Form.Group>
+        <Form.Group controlId="availabilityTime" className="mb-3">
+          <Form.Label>Time</Form.Label>
+          <Form.Control 
+            type="time" 
+            value={availability.time} 
+            onChange={(e) => setAvailability({ ...availability, time: e.target.value })}
+          />
+        </Form.Group>
+        <Button variant="primary" type="submit">Submit Availability</Button>
+      </Form>
+    </Container>
+  );
+};
+
 const StudentNavbar = ({ setIsAuthenticated }) => {
   const location = useLocation();
   const getLinkStyle = (path) => ({
@@ -176,7 +306,6 @@ const StudentNavbar = ({ setIsAuthenticated }) => {
   );
 };
 
-// Tutor Navbar
 const TutorNavbar = ({ setIsAuthenticated }) => {
   const location = useLocation();
   const getLinkStyle = (path) => ({
@@ -252,7 +381,8 @@ function App() {
   const [password, setPassword] = useState('');
   const [showAlert, setShowAlert] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [role, setRole] = useState(''); // Will be either 'tutor' or 'student'
+  const [role, setRole] = useState(''); // 'tutor' or 'student'
+
   const handleLogin = (e) => {
     e.preventDefault();
     const userRole = authenticateUser(username, password);
@@ -264,67 +394,79 @@ function App() {
       setShowAlert(true);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <Container
+        className="d-flex flex-column justify-content-center align-items-center"
+        style={{ minHeight: '100vh' }}
+      >
+        <h1 className="text-center mb-4" style={{ fontSize: '3rem', fontWeight: 'bold' }}>
+          TutorConnect
+        </h1>
+        <Card className="shadow-lg p-4">
+          <Card.Body>
+            <h2 className="text-center mb-4">Login</h2>
+            {showAlert && (
+              <Alert variant="danger" onClose={() => setShowAlert(false)} dismissible>
+                Invalid username or password. Please try again.
+              </Alert>
+            )}
+            <Form onSubmit={handleLogin}>
+              <FormGroup controlId="username" className="mb-3">
+                <FormControl
+                  type="text"
+                  placeholder="Username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </FormGroup>
+              <FormGroup controlId="password" className="mb-3">
+                <FormControl
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </FormGroup>
+              <Button type="submit" variant="primary" block>
+                Login
+              </Button>
+            </Form>
+          </Card.Body>
+        </Card>
+      </Container>
+    );
+  }
+
   return (
     <Router>
-      <div className="App" style={{ background: '#F7F9FC', minHeight: '100vh', paddingTop: '50px' }}>
-        {/* Navbar based on user role */}
-        {isAuthenticated && role === 'tutor' && <TutorNavbar setIsAuthenticated={setIsAuthenticated} />}
-        {isAuthenticated && role === 'student' && <StudentNavbar setIsAuthenticated={setIsAuthenticated} />}
-        {/* Main Content */}
-        <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
-          <Row className="w-100 justify-content-center">
-            <Col xs={12} md={6} lg={4}>
-              {isAuthenticated ? (
-                <Routes>
-                  <Route path="/" element={<HomePage username={username} />} />
-                  <Route path="/tutors" element={<TutorsPage />} />
-                  <Route path="/resources" element={<ResourcesPage />} />
-                  <Route path="/tools" element={<ToolsPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
-                  <Route path="/tutor-availability" element={<TutorAvailability />} /> 
-                  <Route path="/add-event" element={<AddEvent />} />
-                  <Route path="/tutor-session-calendar" element={<TutorSessionCalendar />} />
-                </Routes>
-              ) : (
-                <Card className="shadow-lg p-4">
-                  <Card.Body>
-                    <h2 className="text-center mb-4">Login</h2>
-                    {showAlert && (
-                      <Alert variant="danger" onClose={() => setShowAlert(false)} dismissible>
-                        Invalid username or password. Please try again.
-                      </Alert>
-                    )}
-                    <Form onSubmit={handleLogin}>
-                      <FormGroup controlId="username" className="mb-3">
-                        <FormControl
-                          type="text"
-                          placeholder="Username"
-                          value={username}
-                          onChange={(e) => setUsername(e.target.value)}
-                          required
-                        />
-                      </FormGroup>
-                      <FormGroup controlId="password" className="mb-3">
-                        <FormControl
-                          type="password"
-                          placeholder="Password"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                        />
-                      </FormGroup>
-                      <Button type="submit" variant="primary" block>
-                        Login
-                      </Button>
-                    </Form>
-                  </Card.Body>
-                </Card>
-              )}
-            </Col>
-          </Row>
-        </Container>
-      </div>
+      {role === 'tutor' ? <TutorNavbar setIsAuthenticated={setIsAuthenticated} /> : <StudentNavbar setIsAuthenticated={setIsAuthenticated} />}
+      <Routes>
+        <Route path="/" element={<HomePage username={username} role={role} />} />
+        <Route path="/tutors" element={<TutorsPage />} />
+        <Route path="/resources" element={
+          <Container className="mt-4">
+            <h2>Resources</h2>
+            <p>Useful resources will appear here.</p>
+          </Container>
+        } />
+        <Route path="/tools" element={
+          <Container className="mt-4">
+            <h2>Tools</h2>
+            <p>Various tools available will be listed here.</p>
+          </Container>
+        } />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/tutor-availability" element={<TutorAvailability />} /> 
+        <Route path="/add-event" element={<AddEvent />} />
+        <Route path="/tutor-session-calendar" element={<TutorSessionCalendar />} />
+      </Routes>
     </Router>
   );
 }
+
 export default App;
+
