@@ -63,6 +63,8 @@ app.get('/auth/callback', async (req, res) => {
 });
 
 // Route to handle adding events to Google Calendar
+const { DateTime } = require('luxon'); // Import Luxon for better time handling
+
 app.post('/add-event', async (req, res) => {
   console.log('Received event data:', req.body);
 
@@ -71,10 +73,12 @@ app.post('/add-event', async (req, res) => {
   }
 
   const { title, startDateTime, endDateTime, description, location } = req.body;
-  const start = new Date(startDateTime);
-  const end = new Date(endDateTime);
 
-  if (isNaN(start) || isNaN(end)) {
+  // Convert start and end time to UTC
+  const start = DateTime.fromISO(startDateTime, { zone: "local" }).toUTC().toISO();
+  const end = DateTime.fromISO(endDateTime, { zone: "local" }).toUTC().toISO();
+
+  if (!start || !end) {
     return res.status(400).json({ error: 'Invalid date format' });
   }
 
@@ -83,12 +87,12 @@ app.post('/add-event', async (req, res) => {
     location: location || 'Online',
     description: description || 'No description',
     start: {
-      dateTime: start.toISOString(),
-      timeZone: 'America/New_York',
+      dateTime: start, // Send UTC time
+      timeZone: 'UTC', // Explicitly set UTC
     },
     end: {
-      dateTime: end.toISOString(),
-      timeZone: 'America/New_York',
+      dateTime: end,
+      timeZone: 'UTC',
     },
   };
 
