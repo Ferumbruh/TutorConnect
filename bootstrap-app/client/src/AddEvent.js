@@ -31,14 +31,24 @@ const AddEvent = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+  
+    // Convert local time to UTC before sending to backend
+    const localStart = new Date(eventData.startDateTime);
+    const localEnd = new Date(eventData.endDateTime);
+  
+    const eventToSend = {
+      ...eventData,
+      startDateTime: localStart.toISOString(), // Ensure UTC format
+      endDateTime: localEnd.toISOString(),
+    };
+  
     try {
       const response = await fetch(`${BACKEND_URL}/add-event`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(eventData),
+        body: JSON.stringify(eventToSend),
       });
-
+  
       const data = await response.json();
       alert(data.message || 'Event added successfully!');
     } catch (error) {
