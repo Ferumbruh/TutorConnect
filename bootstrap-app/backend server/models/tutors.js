@@ -1,7 +1,12 @@
 const { DataTypes, Model } = require('sequelize');
+const bcrypt = require('bcrypt');
 const sequelize = require('../config/connection');
 
-class Tutors extends Model {}
+class Tutors extends Model {
+  async checkPassword(loginPw) {
+    return bcrypt.compare(loginPw, this.password);
+  }
+}
 
 Tutors.init(
   {
@@ -11,20 +16,23 @@ Tutors.init(
       autoIncrement: true,
       allowNull: false,
     },
-    tutorsName: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    tutorsEmail: {
+    email: { 
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+      validate: {
+        isEmail: true,
+      },
     },
-    tutorsPassword: {
+    password: { 
       type: DataTypes.STRING,
       allowNull: false,
     },
-    tutorsRole: {
+    role: { 
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -33,6 +41,16 @@ Tutors.init(
     sequelize,
     modelName: 'Tutors',
     tableName: 'tutors',
+    hooks: {
+      beforeCreate: async (tutor) => {
+        tutor.password = await bcrypt.hash(tutor.password, 10);
+      },
+      beforeUpdate: async (tutor) => {
+        if (tutor.changed('password')) {
+          tutor.password = await bcrypt.hash(tutor.password, 10);
+        }
+      },
+    },
   }
 );
 

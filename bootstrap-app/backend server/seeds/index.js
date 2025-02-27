@@ -1,6 +1,18 @@
-const seedStudentsInfo = require('./students-seeds');
-const seedTutorsInfo = require('./tutors-seeds');
-const sequelize = require('../config/connection.js');
+const { Students, Tutors } = require('../models');
+const sequelize = require('../config/connection');
+
+const seedStudentsInfo = async () => {
+  await Students.bulkCreate([
+    { name: 'Xavaier', studentsEmail: 'xavaier@example.com' },
+    { name: 'Zachary', studentsEmail: 'zachary@example.com' },
+  ]);
+};
+
+const seedTutorsInfo = async () => {
+  await Tutors.bulkCreate([
+    { tutorsName: 'Kim', tutorsEmail: 'kim@example.com', tutorsPassword: '123', tutorsRole: 'tutor'}
+  ]);
+};
 
 const seedAll = async () => {
   try {

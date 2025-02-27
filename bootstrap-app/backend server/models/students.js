@@ -1,38 +1,53 @@
-const { DataTypes, Model } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
+const bcrypt = require('bcrypt');
 const sequelize = require('../config/connection');
 
-class Students extends Model {}
+class Students extends Model {
+  async checkPassword(loginPw) {
+    return bcrypt.compare(loginPw, this.password);
+  }
+}
 
 Students.init(
   {
     id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       primaryKey: true,
       autoIncrement: true,
-      allowNull: false,
     },
-    studentsName: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    studentsEmail: {
+    email: { 
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+      validate: {
+        isEmail: true,
+      },
     },
-    studentsRole: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    studentsPassword: {
+    password: {
       type: DataTypes.STRING,
       allowNull: false,
     },
   },
   {
     sequelize,
-    modelName: 'Students',
-    tableName: 'students',
+    timestamps: false,
+    modelName: 'students',
+    hooks: {
+    
+      beforeCreate: async (student) => {
+        student.password = await bcrypt.hash(student.password, 10);
+      },
+      beforeUpdate: async (student) => {
+        if (student.changed('password')) {
+          student.password = await bcrypt.hash(student.password, 10);
+        }
+      },
+    },
   }
 );
 

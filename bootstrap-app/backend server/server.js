@@ -3,9 +3,6 @@ const express = require('express');
 const sequelize = require('./config/connection');
 const routes = require('./routes');
 
-const studentsRoutes = require('./routes/api/studentsRoutes');
-const tutorsRoutes = require('./routes/api/tutorsRoutes');
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 
