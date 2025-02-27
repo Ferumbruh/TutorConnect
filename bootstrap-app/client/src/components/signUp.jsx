@@ -1,60 +1,52 @@
 import { useState, useRef, useEffect } from "react";
+import { Form, FormGroup, FormControl, Button, Alert, Dropdown } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 function SignUp() {
     const [formData, setFormData] = useState({
-        //role defaults to student, dropdown menu for role selection
-        role: 'student',
-        name: '',
-        email: '',
-        password: '',
+        role: "student",
+        name: "",
+        email: "",
+        password: "",
     });
 
-    const [error, setError] = useState({});
-    const [suggestions, setSuggestions] = useState([]); 
-    // Controls domain auto-suggestion dropdown
+    const [errors, setErrors] = useState({});
+    const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
-    // Tracks highlighted suggestion
-    const [highlightIndex, setHighlightIndex] = useState(-1); 
-    // Reference for click detection
-    const inputRef = useRef(null); 
-    // Navigation hook, redirects after signup
+    const [highlightIndex, setHighlightIndex] = useState(-1);
+    const [serverError, setServerError] = useState("");
+    const [loading, setLoading] = useState(false);
+    
+    const inputRef = useRef(null);
     const navigate = useNavigate();
 
-// Array of common email domains
     const domains = ["gmail.com", "yahoo.com", "outlook.com", "icloud.com", "hotmail.com"];
 
-    // Validates the form before submission
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.role) {
-            newErrors.role = "Please select a role.";
-        }
-        if (!formData.name.trim()) {
-            newErrors.name = "Name is required";
-        }
+        if (!formData.role) newErrors.role = "Please select a role.";
+        if (!formData.name.trim()) newErrors.name = "Name is required";
         if (!formData.email.trim()) {
             newErrors.email = "Email is required";
         } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = "Email is invalid";
+            newErrors.email = "Invalid email format";
         }
         if (!formData.password.trim()) {
             newErrors.password = "Password is required";
         } else if (formData.password.length < 8) {
             newErrors.password = "Password must be at least 8 characters";
         }
-        setError(newErrors);
+        setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    // Handles email input changes (for auto-suggestions)
     const handleEmailChange = (e) => {
         const value = e.target.value;
         setFormData({ ...formData, email: value });
-        setHighlightIndex(-1); 
+        setHighlightIndex(-1);
+        setShowSuggestions(false);
 
         const atIndex = value.indexOf("@");
-
         if (atIndex !== -1) {
             const typedDomain = value.slice(atIndex + 1);
             const username = value.slice(0, atIndex + 1);
@@ -65,19 +57,15 @@ function SignUp() {
 
             setSuggestions(filteredDomains);
             setShowSuggestions(filteredDomains.length > 0);
-        } else {
-            setShowSuggestions(false);
         }
     };
 
-    // Handles selecting a suggestion
     const handleSelect = (suggestion) => {
         setFormData({ ...formData, email: suggestion });
         setShowSuggestions(false);
         setHighlightIndex(-1);
     };
 
-    // Handles keyboard navigation for auto-suggestions
     const handleKeyDown = (e) => {
         if (showSuggestions) {
             if (e.key === "ArrowDown") {
@@ -97,7 +85,6 @@ function SignUp() {
         }
     };
 
-    // Close suggestions if clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (inputRef.current && !inputRef.current.contains(event.target)) {
@@ -109,126 +96,130 @@ function SignUp() {
         return () => document.removeEventListener("click", handleClickOutside);
     }, []);
 
-    // Handles form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validateForm()) return;
 
-        console.log("Signup Data:", formData);
+        setLoading(true);
+        setServerError("");
 
-        // TODO: Backend signup logic here
-        // Define endpoint for request
         try {
-        const response = await fetch("/api/signup", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData),
-        });
+            const response = await fetch("/api/auth/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
+            });
 
-        const data = await response.json();
-       if(response.ok){
-        console.log("Signup successful:", data);
-        // Clear any previous errors
-        setError({});
-        // Redirect to home page after successful signup
-        navigate("/login");
-       }else{
-        // Handle signup failure
-        console.log("Signup failed:", data);
-        setError({ server: data.message });
-       }
-    } catch (error) {
-        // Handle signup error (request error)
-        console.error("Error during signup attempt:", error);
-        setError({ server: "Error occurred during signup" });
-    }
+            const data = await response.json();
+            if (response.ok) {
+                alert("Signup successful. Please log in.");
+                navigate("/login");
+                setErrors({});
+            } else {
+                setServerError(data.message || "Signup failed.");
+            }
+        } catch (error) {
+            setServerError("Error occurred during signup.");
+        } finally {
+            setLoading(false);
+        }
     };
-
+   //Login redirect function
+    const loginRedirect = () => {
+        navigate('/login');
+    };
     return (
-        <form onSubmit={handleSubmit} style={{ maxWidth: "400px", margin: "auto" }}>
-             {/* Role Selection Dropdown */}
-      <label htmlFor="role">Sign up as:</label>
-      <select name="role" value={formData.role} onChange={handleChange}>
-        <option value="Student">Student</option>
-        <option value="Tutor">Tutor</option>
-      </select>
-      {error.role && <p>{error.role}</p>}
+        <Form onSubmit={handleSubmit} className="p-4 shadow-lg rounded bg-white" style={{ maxWidth: "400px", margin: "auto" }}>
+            <h2 className="text-center mb-4">Welcome to TutorConnect!</h2>
+            <h2 className="text-center mb-4">Sign Up</h2>
 
-            {/* NAME FIELD */}
-            <label htmlFor="name">Name:</label>
-            <input
-                type="text"
-                placeholder="Enter Name"
-                name="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            />
-            {error.name && <p>{error.name}</p>}
+            {serverError && <Alert variant="danger">{serverError}</Alert>}
 
-            {/* EMAIL FIELD WITH AUTO-SUGGEST */}
-            <div ref={inputRef} style={{ position: "relative" }}>
-                <label htmlFor="email">Email:</label>
-                <input
+            {/* Role Selection */}
+            <FormGroup className="mb-3">
+                <Form.Label>Sign up as</Form.Label>
+                <Form.Select
+                    name="role"
+                    value={formData.role}
+                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    isInvalid={!!errors.role}
+                >
+                    <option value="student">Student</option>
+                    <option value="tutor">Tutor</option>
+                </Form.Select>
+                <Form.Control.Feedback type="invalid">{errors.role}</Form.Control.Feedback>
+            </FormGroup>
+
+            {/* Name Field */}
+            <FormGroup className="mb-3">
+                <Form.Label>Full Name</Form.Label>
+                <FormControl
                     type="text"
-                    placeholder="Enter Email"
+                    name="name"
+                    placeholder="Enter Name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    isInvalid={!!errors.name}
+                    required
+                />
+                <Form.Control.Feedback type="invalid">{errors.name}</Form.Control.Feedback>
+            </FormGroup>
+
+            {/* Email Field with Auto-Suggestions */}
+            <FormGroup className="mb-3" ref={inputRef} style={{ position: "relative" }}>
+                <Form.Label>Email</Form.Label>
+                <FormControl
+                    type="text"
                     name="email"
+                    placeholder="Enter Email"
                     value={formData.email}
                     onChange={handleEmailChange}
                     onKeyDown={handleKeyDown}
+                    isInvalid={!!errors.email}
                     autoComplete="off"
                     required
-                    style={{ width: "100%", padding: "8px" }}
                 />
+                <Form.Control.Feedback type="invalid">{errors.email}</Form.Control.Feedback>
+
                 {showSuggestions && (
-                    <div
-                        style={{
-                            position: "absolute",
-                            background: "white",
-                            border: "1px solid #ccc",
-                            width: "100%",
-                            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
-                            zIndex: 1000,
-                            maxHeight: "150px",
-                            overflowY: "auto",
-                        }}
-                    >
+                    <Dropdown.Menu show style={{ position: "absolute", width: "100%", zIndex: 1000 }}>
                         {suggestions.map((suggestion, index) => (
-                            <div
+                            <Dropdown.Item
                                 key={index}
                                 onClick={() => handleSelect(suggestion)}
-                                style={{
-                                    padding: "10px",
-                                    cursor: "pointer",
-                                    borderBottom: "1px solid #eee",
-                                    backgroundColor: highlightIndex === index ? "#f0f0f0" : "white",
-                                }}
-                                onMouseEnter={() => setHighlightIndex(index)}
-                                onMouseLeave={() => setHighlightIndex(-1)}
+                                active={index === highlightIndex}
                             >
                                 {suggestion}
-                            </div>
+                            </Dropdown.Item>
                         ))}
-                    </div>
+                    </Dropdown.Menu>
                 )}
-            </div>
-            {error.email && <p>{error.email}</p>}
+            </FormGroup>
 
-            {/* PASSWORD FIELD */}
-            <label htmlFor="password">Password:</label>
-            <input
-                type="password"
-                placeholder="Enter Password"
-                name="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            />
-            {error.password && <p>{error.password}</p>}
-            {error.server && <p>{error.server}</p>}
-            <br />
-            <button type="submit">Sign Up</button>
-        </form>
+            {/* Password Field */}
+            <FormGroup className="mb-3">
+                <Form.Label>Password</Form.Label>
+                <FormControl
+                    type="password"
+                    name="password"
+                    placeholder="Enter Password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    isInvalid={!!errors.password}
+                    required
+                />
+                <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>
+            </FormGroup>
+
+            <Button type="submit" variant="primary" className="w-100" disabled={loading}>
+                {loading ? "Signing up..." : "Sign Up"}
+            </Button>
+
+            <p className="text-center mt-3">
+                Already have an account?{" "}
+                <Button variant="link" onClick={loginRedirect}>Login</Button>
+            </p>
+        </Form>
     );
 }
 

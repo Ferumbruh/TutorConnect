@@ -4,8 +4,9 @@ const { google } = require('googleapis');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 const cors = require('cors');
-
+const authRoutes = require('./middleware/authRoutes');
 const app = express();
+
 
 // Configure CORS to allow requests only from your frontend
 const corsOptions = {
@@ -17,6 +18,8 @@ app.use(cors(corsOptions));
 
 // Middleware
 app.use(bodyParser.json());
+
+app.use('/api/auth', authRoutes);
 
 app.get('/', (req, res) => {
   res.send('Backend is running!');

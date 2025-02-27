@@ -1,24 +1,22 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Navigate } from 'react-router-dom';
 import {
   Container,
   Navbar,
   Nav,
   Button,
-  Form,
-  FormGroup,
-  FormControl,
-  Alert,
-  Card,
   NavDropdown,
   Modal,
 } from 'react-bootstrap';
 import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom';
 import TutorAvailability from './tutoravailability'; // Importing TutorAvailability component
 import AddEvent from './AddEvent'; // Importing AddEvent component
+import SignUp from './components/signUp'; // Importing SignUp component
+import LoginForm from './components/login'; // Importing Login component
+import PrivateRoute from './components/privateRoute'; // Importing PrivateRoute component
 
 // Dummy authentication function
-const authenticateUser = (username, password) => {
+/*const authenticateUser = (username, password) => {
   if (username === 'tutor' && password === 'pass') {
     return 'tutor';
   }
@@ -26,7 +24,7 @@ const authenticateUser = (username, password) => {
     return 'student';
   }
   return null;
-};
+}; */
 
 // API calls for Google Calendar and Sheets
 const API_BASE_URL = "https://tutorconnect-1u9q.onrender.com";
@@ -300,97 +298,68 @@ const TutorNavbar = ({ setIsAuthenticated }) => {
     </Navbar>
   );
 };
-
 function App() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [showAlert, setShowAlert] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [role, setRole] = useState(''); // 'tutor' or 'student'
+  const [role, setRole] = useState("");
+  const [username, setUsername] = useState("");
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    const userRole = authenticateUser(username, password);
-    if (userRole) {
-      setIsAuthenticated(true);
-      setRole(userRole);
-      setShowAlert(false);
-    } else {
-      setShowAlert(true);
-    }
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <Container
-        className="d-flex flex-column justify-content-center align-items-center"
-        style={{ minHeight: '100vh' }}
-      >
-        <h1 className="text-center mb-4" style={{ fontSize: '3rem', fontWeight: 'bold' }}>
-          TutorConnect
-        </h1>
-        <Card className="shadow-lg p-4">
-          <Card.Body>
-            <h2 className="text-center mb-4">Login</h2>
-            {showAlert && (
-              <Alert variant="danger" onClose={() => setShowAlert(false)} dismissible>
-                Invalid username or password. Please try again.
-              </Alert>
-            )}
-            <Form onSubmit={handleLogin}>
-              <FormGroup controlId="username" className="mb-3">
-                <FormControl
-                  type="text"
-                  placeholder="Username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </FormGroup>
-              <FormGroup controlId="password" className="mb-3">
-                <FormControl
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </FormGroup>
-              <Button type="submit" variant="primary">
-                Login
-              </Button>
-            </Form>
-          </Card.Body>
-        </Card>
-      </Container>
-    );
+useEffect(() => {
+  const token = localStorage.getItem('token');
+  const storedRole = localStorage.getItem('role');
+  const storedUsername = localStorage.getItem('username');
+  if (token) {
+    setIsAuthenticated(true);
+    setRole(storedRole);
+    setUsername(storedUsername|| "User");
   }
+},[]);
+  
+
+  
 
   return (
     <Router>
-      {role === 'tutor' ? <TutorNavbar setIsAuthenticated={setIsAuthenticated} /> : <StudentNavbar setIsAuthenticated={setIsAuthenticated} />}
-      <Routes>
-        <Route path="/" element={<HomePage username={username} role={role} />} />
-        <Route path="/tutors" element={<TutorsPage />} />
+    {isAuthenticated && (
+        role === "tutor" ? (
+            <TutorNavbar setIsAuthenticated={setIsAuthenticated} />
+        ) : (
+            <StudentNavbar setIsAuthenticated={setIsAuthenticated} />
+        )
+    )}
+
+    <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={<LoginForm setIsAuthenticated={setIsAuthenticated} />} />
+        <Route path="/signup" element={<SignUp/>} />
+
+        {/* Private Routes (Protected by PrivateRoute) */}
+        <Route path="/" element={<PrivateRoute><HomePage username={username} role={role} /></PrivateRoute>} />
+        <Route path="/tutors" element={<PrivateRoute><TutorsPage /></PrivateRoute>} />
         <Route path="/resources" element={
-          <Container className="mt-4">
-            <h2>Resources</h2>
-            <p>Useful resources will appear here.</p>
-          </Container>
+            <PrivateRoute>
+                <Container className="mt-4">
+                    <h2>Resources</h2>
+                    <p>Useful resources will appear here.</p>
+                </Container>
+            </PrivateRoute>
         } />
         <Route path="/tools" element={
-          <Container className="mt-4">
-            <h2>Tools</h2>
-            <p>Various tools available will be listed here.</p>
-          </Container>
+            <PrivateRoute>
+                <Container className="mt-4">
+                    <h2>Tools</h2>
+                    <p>Various tools available will be listed here.</p>
+                </Container>
+            </PrivateRoute>
         } />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/tutoravailability" element={<TutorAvailability />} /> 
-        <Route path="/add-event" element={<AddEvent />} />
-        <Route path="/tutor-session-calendar" element={<TutorSessionCalendar />} />
-      </Routes>
-    </Router>
+        <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+        <Route path="/tutoravailability" element={<PrivateRoute><TutorAvailability /></PrivateRoute>} />
+        <Route path="/add-event" element={<PrivateRoute><AddEvent /></PrivateRoute>} />
+        <Route path="/tutor-session-calendar" element={<PrivateRoute><TutorSessionCalendar /></PrivateRoute>} />
+
+        {/* Redirect all unknown routes */}
+        <Route path="*" element={<Navigate to={isAuthenticated ? "/" : "/login"} />} />
+    </Routes>
+</Router>
   );
 }
-
 export default App;
