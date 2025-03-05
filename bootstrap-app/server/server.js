@@ -1,11 +1,11 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const { google } = require('googleapis');
 const bodyParser = require('body-parser');
-require('dotenv').config();
 const cors = require('cors');
-const authRoutes = require('./middleware/authRoutes');
 const app = express();
+const PORT = process.env.PORT || 3001;
 
 
 // Configure CORS to allow requests only from your frontend
@@ -18,6 +18,8 @@ app.use(cors(corsOptions));
 
 // Middleware
 app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/auth', authRoutes);
 
@@ -56,8 +58,6 @@ app.get('/auth/callback', async (req, res) => {
     const code = req.query.code;
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
-
-    // Redirect back to AddEvent.js page (frontend)
     res.redirect('https://tutorconnectfrontend.onrender.com/add-event');
   } catch (error) {
     console.error('Authentication error:', error);
@@ -66,7 +66,8 @@ app.get('/auth/callback', async (req, res) => {
 });
 
 // Route to handle adding events to Google Calendar
-const { DateTime } = require('luxon'); // Import Luxon for better time handling
+const { DateTime } = require('luxon');
+const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
 app.post('/add-event', async (req, res) => {
   console.log('Received event data:', req.body);
@@ -76,8 +77,6 @@ app.post('/add-event', async (req, res) => {
   }
 
   const { title, startDateTime, endDateTime, description, location } = req.body;
-
-  // Convert start and end time to UTC
   const start = DateTime.fromISO(startDateTime, { zone: "local" }).toUTC().toISO();
   const end = DateTime.fromISO(endDateTime, { zone: "local" }).toUTC().toISO();
 
@@ -89,23 +88,12 @@ app.post('/add-event', async (req, res) => {
     summary: title,
     location: location || 'Online',
     description: description || 'No description',
-    start: {
-      dateTime: start, // Send UTC time
-      timeZone: 'UTC', // Explicitly set UTC
-    },
-    end: {
-      dateTime: end,
-      timeZone: 'UTC',
-    },
+    start: { dateTime: start, timeZone: 'UTC' },
+    end: { dateTime: end, timeZone: 'UTC' },
   };
 
-  const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-
   try {
-    await calendar.events.insert({
-      calendarId: 'primary',
-      resource: event,
-    });
+    await calendar.events.insert({ calendarId: 'primary', resource: event });
     res.json({ message: 'Event created successfully' });
   } catch (error) {
     console.error('Error creating event:', error);
@@ -115,20 +103,11 @@ app.post('/add-event', async (req, res) => {
 
 // Google Sheets API
 const sheets = google.sheets('v4');
-
-// Route to handle tutor availability submission
 app.post('/submit-availability', async (req, res) => {
-  const { name, subject, 
-          sunday_start, sunday_end, 
-          monday_start, monday_end, 
-          tuesday_start, tuesday_end, 
-          wednesday_start, wednesday_end, 
-          thursday_start, thursday_end, 
-          friday_start, friday_end, 
-          saturday_start, saturday_end } = req.body;
-
+  const { name, subject, ...availability } = req.body;
+  
   const convertTo12HourFormat = (time) => {
-    if (!time) return ""; 
+    if (!time) return "";
     const [hours, minutes] = time.split(":").map(Number);
     const period = hours >= 12 ? "PM" : "AM";
     const formattedHours = hours % 12 || 12;
@@ -141,13 +120,13 @@ app.post('/submit-availability', async (req, res) => {
 
   const tutorEntry = [
     `${name} - ${subject}`,
-    formatAvailability(sunday_start, sunday_end),
-    formatAvailability(monday_start, monday_end),
-    formatAvailability(tuesday_start, tuesday_end),
-    formatAvailability(wednesday_start, wednesday_end),
-    formatAvailability(thursday_start, thursday_end),
-    formatAvailability(friday_start, friday_end),
-    formatAvailability(saturday_start, saturday_end)
+    formatAvailability(availability.sunday_start, availability.sunday_end),
+    formatAvailability(availability.monday_start, availability.monday_end),
+    formatAvailability(availability.tuesday_start, availability.tuesday_end),
+    formatAvailability(availability.wednesday_start, availability.wednesday_end),
+    formatAvailability(availability.thursday_start, availability.thursday_end),
+    formatAvailability(availability.friday_start, availability.friday_end),
+    formatAvailability(availability.saturday_start, availability.saturday_end)
   ];
 
   try {
@@ -155,19 +134,17 @@ app.post('/submit-availability', async (req, res) => {
       keyFile: path.join(__dirname, 'credentials.json'),
       scopes: ['https://www.googleapis.com/auth/spreadsheets']
     });
-
+    
     const authClient = await auth.getClient();
     const spreadsheetId = process.env.SPREADSHEET_ID;
-
+    
     await sheets.spreadsheets.values.append({
       auth: authClient,
       spreadsheetId,
       range: 'Sheet1!A:H',
       valueInputOption: 'RAW',
       insertDataOption: 'INSERT_ROWS',
-      resource: {
-        values: [tutorEntry],
-      },
+      resource: { values: [tutorEntry] },
     });
 
     res.json({ message: 'Availability added successfully' });
@@ -177,8 +154,15 @@ app.post('/submit-availability', async (req, res) => {
   }
 });
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// API Routes
+app.use('/api', routes);
+app.use('/api/students', studentsRoutes);
+app.use('/api/tutors', tutorsRoutes);
+
+// Start the server with database connection
+sequelize.sync({ force: false }).then(() => {
+  console.log('✅ Connected to database.');
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  });
 });
