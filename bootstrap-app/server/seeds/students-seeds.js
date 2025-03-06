@@ -1,7 +1,7 @@
-const { StudentsInfo } = require('../models');
+const { Students } = require('../models');
 
 const seedStudentsInfo = async () => {
-  await StudentsInfo.bulkCreate(
+  await Students.bulkCreate(
     [
       { studentsName: 'Xavaier' },
       { studentsName: 'Zachary' },

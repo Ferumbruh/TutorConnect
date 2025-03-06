@@ -1,8 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
-const { Students, Tutors } = require('../../models');
+const { Students, Tutors } = require('../models/index');
 
 const router = express.Router();
 
@@ -10,7 +10,7 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    let user = await Students.findOne({ where: { studentsEmail: email } });
+    let user = await Students.findOne({ where: { email } });
     if (!user) {
       user = await Tutors.findOne({ where: { email } });
     }

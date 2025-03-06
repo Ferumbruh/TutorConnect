@@ -3,8 +3,8 @@ const sequelize = require('../config/connection');
 
 const seedStudentsInfo = async () => {
   await Students.bulkCreate([
-    { name: 'Xavaier', studentsEmail: 'xavaier@example.com' },
-    { name: 'Zachary', studentsEmail: 'zachary@example.com' },
+    { name: 'Xavaier', email: 'xavaier@example.com' },
+    { name: 'Zachary', email: 'zachary@example.com' },
   ]);
 };
 

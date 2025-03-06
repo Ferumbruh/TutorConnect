@@ -156,8 +156,6 @@ app.post('/submit-availability', async (req, res) => {
 
 // API Routes
 app.use('/api', routes);
-app.use('/api/students', studentsRoutes);
-app.use('/api/tutors', tutorsRoutes);
 
 // Start the server with database connection
 sequelize.sync({ force: false }).then(() => {
