@@ -1,15 +1,16 @@
 const { Students, Tutors } = require('../models');
 const sequelize = require('../config/connection');
+const bcrypt = require('bcryptjs');
 
 const seedStudentsInfo = async () => {
   await Students.bulkCreate([
-    { name: 'Xavaier', email: 'xavaier@example.com', password: 'long', studentsRole: 'student'}
+    { name: 'Xavaier', email: 'xavaier@example.com', password: await bcrypt.hash('school', 10), role: 'student'}
   ]);
 };
 
 const seedTutorsInfo = async () => {
   await Tutors.bulkCreate([
-    { name: 'Kim', email: 'kim@example.com', password: 'school', tutorsRole: 'tutor'}
+    { name: 'Kim', email: 'kim@example.com', password: await bcrypt.hash('school', 10), role: 'tutor'}
   ]);
 };
 
