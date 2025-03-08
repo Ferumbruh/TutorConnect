@@ -1,5 +1,5 @@
 const { DataTypes, Model } = require('sequelize');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const sequelize = require('../config/connection');
 
 class Tutors extends Model {
@@ -39,7 +39,7 @@ Tutors.init(
   },
   {
     sequelize,
-    modelName: 'Tutors',
+    modelName: 'tutors',
     tableName: 'tutors',
     hooks: {
       beforeCreate: async (tutor) => {

@@ -4,9 +4,11 @@ const path = require('path');
 const { google } = require('googleapis');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const sequelize = require('./config/connection');
+const routes = require('./routes');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
-
 
 // Configure CORS to allow requests only from your frontend
 const corsOptions = {
@@ -20,8 +22,6 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.use('/api/auth', authRoutes);
 
 app.get('/', (req, res) => {
   res.send('Backend is running!');
@@ -156,8 +156,6 @@ app.post('/submit-availability', async (req, res) => {
 
 // API Routes
 app.use('/api', routes);
-app.use('/api/students', studentsRoutes);
-app.use('/api/tutors', tutorsRoutes);
 
 // Start the server with database connection
 sequelize.sync({ force: false }).then(() => {
