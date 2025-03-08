@@ -39,7 +39,7 @@ Tutors.init(
   },
   {
     sequelize,
-    modelName: 'Tutors',
+    modelName: 'tutors',
     tableName: 'tutors',
     hooks: {
       beforeCreate: async (tutor) => {

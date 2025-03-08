@@ -28,6 +28,10 @@ Students.init(
         isEmail: true,
       },
     },
+    role: { 
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -37,6 +41,7 @@ Students.init(
     sequelize,
     timestamps: false,
     modelName: 'students',
+    tableName: 'students',
     hooks: {
     
       beforeCreate: async (student) => {

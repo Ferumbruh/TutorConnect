@@ -3,14 +3,13 @@ const sequelize = require('../config/connection');
 
 const seedStudentsInfo = async () => {
   await Students.bulkCreate([
-    { name: 'Xavaier', email: 'xavaier@example.com' },
-    { name: 'Zachary', email: 'zachary@example.com' },
+    { name: 'Xavaier', email: 'xavaier@example.com', password: 'long', studentsRole: 'student'}
   ]);
 };
 
 const seedTutorsInfo = async () => {
   await Tutors.bulkCreate([
-    { tutorsName: 'Kim', tutorsEmail: 'kim@example.com', tutorsPassword: '123', tutorsRole: 'tutor'}
+    { name: 'Kim', email: 'kim@example.com', password: 'school', tutorsRole: 'tutor'}
   ]);
 };
 

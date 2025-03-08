@@ -3,10 +3,7 @@ const { Tutors } = require('../models');
 const seedTutorsInfo = async () => {
   await Tutors.bulkCreate(
     [
-      { tutorsName: 'Kim' }, 
-      { tutorsName: 'Austin' },
-      { tutorsName: 'Eric' },
-      { tutorsName: 'Substitute' }
+      {  tutorsName: 'Kim', email: 'kim@example.com', password: 'school', tutorsRole: 'tutor' }
     ],
     { individualHooks: true }
   );
